@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentConnect | Твій перший досвід</title>
+    
+    <!-- PWA Meta Tags & Manifest -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22StudentConnect%22%2C%22short_name%22%3A%22StudentConnect%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230B1635%22%2C%22theme_color%22%3A%22%236846E8%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22logo.jpg%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
+    <meta name="theme-color" content="#6846E8">
+    <link rel="apple-touch-icon" href="logo.jpg">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            navy: '#0B1635',
+                            purple: '#6846E8',
+                            blue: '#3D7CFF',
+                            cyan: '#61C7FF',
+                            pink: '#B75CFF',
+                            bg: '#F7F8FC'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(11, 22, 53, 0.05)',
+                        'glow': '0 0 20px rgba(104, 70, 232, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F7F8FC; color: #0B1635; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.4); }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease-out; }
+        .nav-item.active { background: #EEF2FF; color: #6846E8; font-weight: 600; }
+        .gradient-text { background: linear-gradient(90deg, #3D7CFF, #6846E8, #B75CFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #6846E8 0%, #3D7CFF 100%); }
+    </style>
+</head>
+<body class="antialiased font-sans h-screen flex overflow-hidden selection:bg-brand-purple selection:text-white">
+
+    <!-- ================= AUTH SCREEN ================= -->
+    <div id="auth-screen" class="fixed inset-0 z-50 bg-brand-bg flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-soft w-full max-w-4xl flex overflow-hidden slide-up">
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                <div class="flex items-center gap-3 mb-6">
+                    <img src="logo.jpg" alt="StudentConnect" class="h-10 w-10 rounded-xl object-cover" onerror="this.src='https://ui-avatars.com/api/?name=S&background=0B1635&color=fff'">
+                    <span class="text-xl font-bold tracking-tight">StudentConnect</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold mb-2">Увійди в <span class="gradient-text">платформу</span></h1>
+                <p class="text-gray-500 text-sm mb-6">Твій перший досвід починається тут. Створюй портфолио ще під час навчання :)</p>
+                
+                <!-- Demo Quick Login Button -->
+                <button onclick="app.loginAsDemo()" class="w-full mb-6 py-3.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-xl font-semibold shadow-glow hover:opacity-95 transition transform active:scale-95 flex items-center justify-center gap-2">
+                    <i class="ph-fill ph-lightning text-lg"></i> Continue as Demo Student (Daria)
+                </button>
+
+                <div class="relative flex py-2 items-center mb-6">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="flex-shrink mx-4 text-gray-400 text-xs uppercase">або через email</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" value="daria@studentconnect.ua" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-brand-purple text-sm" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" value="password123" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-brand-purple text-sm" required>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-brand-navy hover:bg-opacity-90 text-white rounded-xl font-medium transition text-sm shadow-md">
+                        Sign In
+                    </button>
+                </form>
+            </div>
+            <div class="w-1/2 gradient-bg p-12 text-white flex flex-col justify-between hidden md:flex">
+                <div class="glass p-6 rounded-2xl w-3/4 slide-up" style="animation-delay: 0.2s">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center"><i class="ph ph-briefcase"></i></div>
+                        <div><p class="font-semibold text-xs">New Match Found</p><p class="text-[10px] text-blue-100">Social Media Manager at NovaTech</p></div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold mb-3">Не чекай на досвід.<br>Створюй його.</h2>
+                    <p class="text-blue-100 text-sm">Платформа для студентів університетів та передових компаній.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP ================= -->
+    <div id="main-app" class="w-full h-full flex hidden">
+        
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="w-64 bg-white border-r border-gray-100 flex-col hidden md:flex z-20">
+            <div class="p-6 flex items-center gap-3 border-b border-gray-50">
+                <img src="logo.jpg" alt="Logo" class="h-8 w-8 rounded-lg object-cover" onerror="this.src='https://ui-avatars.com/api/?name=S&background=0B1635&color=fff'">
+                <span class="text-lg font-bold tracking-tight">StudentConnect</span>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto hide-scrollbar" id="nav-menu"></nav>
+            <div class="p-4 border-t border-gray-50">
+                <button onclick="app.logout()" class="flex items-center gap-3 w-full px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition text-sm font-medium">
+                    <i class="ph ph-sign-out text-lg"></i> Log Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col relative bg-brand-bg h-full overflow-hidden">
+            
+            <!-- TOPBAR -->
+            <header class="h-20 glass border-b border-gray-100 flex items-center justify-between px-6 md:px-10 z-10 sticky top-0">
+                <div class="flex items-center gap-4 w-1/2">
+                    <div class="relative w-full max-w-md hidden md:block">
+                        <i class="ph ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" placeholder="Пошук проєктів, компаній, вакансій..." class="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:border-brand-purple shadow-sm transition">
+                    </div>
+                    <span class="md:hidden font-bold text-lg">StudentConnect</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="hidden sm:flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+                        <div class="w-6 h-6 rounded-full gradient-bg text-white flex items-center justify-center text-xs font-bold" id="topbar-level">8</div>
+                        <span class="text-sm font-semibold text-gray-700" id="topbar-xp">320 XP</span>
+                    </div>
+                    <button class="relative p-2 text-gray-500 hover:text-brand-purple transition">
+                        <i class="ph ph-bell text-2xl"></i>
+                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+                    </button>
+                    <button class="flex items-center gap-3" onclick="app.switchView('profile')">
+                        <img id="topbar-avatar" src="" alt="User" class="w-10 h-10 rounded-full object-cover border border-gray-200">
+                        <div class="hidden lg:block text-left">
+                            <p class="text-sm font-bold text-brand-navy" id="topbar-name">Daria Kassell</p>
+                            <p class="text-xs text-gray-500">Student</p>
+                        </div>
+                    </button>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE VIEWS CONTAINER -->
+            <div class="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-8 relative pb-24 md:pb-8" id="views-container">
+                
+                <!-- 1. DASHBOARD -->
+                <div id="view-dashboard" class="view-section active space-y-8 max-w-7xl mx-auto"></div>
+
+                <!-- 2. PROJECTS -->
+                <div id="view-projects" class="view-section space-y-6 max-w-7xl mx-auto">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold">Реальні проєкти</h2>
+                            <p class="text-gray-500 text-sm mt-1">Обирай завдання відповідно до твоїх навичок.</p>
+                        </div>
+                        <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 hide-scrollbar" id="project-filters"></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="projects-grid"></div>
+                </div>
+
+                <!-- 3. COMPANIES -->
+                <div id="view-companies" class="view-section space-y-6 max-w-7xl mx-auto">
+                    <div>
+                        <h2 class="text-2xl font-bold">Компанії-партнери</h2>
+                        <p class="text-gray-500 text-sm mt-1">Провідні стартапи та компанії, що шукають студентів.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="companies-grid"></div>
+                </div>
+
+                <!-- 4. JOBS -->
+                <div id="view-jobs" class="view-section space-y-6 max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-bold mb-6">Стажування та вакансії</h2>
+                    <div class="flex flex-col gap-4" id="jobs-list"></div>
+                </div>
+
+                <!-- 5. CHATS -->
+                <div id="view-chats" class="view-section h-full max-w-6xl mx-auto">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex h-full overflow-hidden min-h-[550px]">
+                        <div class="w-full md:w-1/3 border-r border-gray-100 flex flex-col h-full" id="chat-list"></div>
+                        <div class="hidden md:flex w-2/3 flex-col bg-brand-bg relative h-full" id="chat-window"></div>
+                    </div>
+                </div>
+
+                <!-- 6. PROFILE -->
+                <div id="view-profile" class="view-section space-y-8 max-w-5xl mx-auto"></div>
+
+            </div>
+        </main>
+
+        <!-- BOTTOM NAV (Mobile) -->
+        <nav class="md:hidden fixed bottom-0 w-full glass border-t border-gray-200 flex justify-around items-center h-16 pb-safe z-50">
+            <button onclick="app.switchView('dashboard')" class="mobile-nav-item active flex flex-col items-center gap-1 p-2 text-gray-400" data-target="dashboard">
+                <i class="ph ph-house text-2xl"></i><span class="text-[10px] font-medium">Головна</span>
+            </button>
+            <button onclick="app.switchView('projects')" class="mobile-nav-item flex flex-col items-center gap-1 p-2 text-gray-400" data-target="projects">
+                <i class="ph ph-briefcase text-2xl"></i><span class="text-[10px] font-medium">Проєкти</span>
+            </button>
+            <button onclick="app.switchView('chats')" class="mobile-nav-item flex flex-col items-center gap-1 p-2 text-gray-400 relative" data-target="chats">
+                <i class="ph ph-chat-circle text-2xl"></i><span class="text-[10px] font-medium">Чати</span>
+                <span class="absolute top-1 right-3 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <button onclick="app.switchView('profile')" class="mobile-nav-item flex flex-col items-center gap-1 p-2 text-gray-400" data-target="profile">
+                <i class="ph ph-user text-2xl"></i><span class="text-[10px] font-medium">Профіль</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL BACKDROP -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-brand-navy bg-opacity-40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4"></div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        const appData = {
+            user: {
+                name: "Daria Kassell",
+                username: "@dariakass",
+                avatar: "https://ui-avatars.com/api/?name=Daria+Kassell&background=B75CFF&color=fff&size=200",
+                level: 8,
+                title: "International Relations Student",
+                university: "Odesa International Humanitarian University",
+                year: "1st Year",
+                city: "Odesa, Ukraine",
+                bio: "Студентка міжнародних відносин, яка цікавиться контентом, комунікаціями, міжнародними проєктами та digital-сферою. Готова до реальних завдань :)",
+                skills: ["Content Creation", "SMM", "Video Editing", "Communication", "English C1", "Marketing"],
+                languages: ["English", "Ukrainian", "German"],
+                stats: { projects: 12, completed: 9, rating: 4.9, connections: 86 },
+                xp: 820,
+                nextXp: 1140
+            },
+            companies: [
+                { id: 1, name: "NovaTech", industry: "Technology & Innovation", logo: "https://ui-avatars.com/api/?name=NT&background=0B1635&color=fff", verified: true, location: "Kyiv, Remote", employees: "50-100", open: 8, rating: 4.8, desc: "We connect talented students with real-world technology projects." },
+                { id: 2, name: "MediaFlow", industry: "Digital Marketing", logo: "https://ui-avatars.com/api/?name=MF&background=6846E8&color=fff", verified: true, location: "Odesa", employees: "10-50", open: 5, rating: 4.9, desc: "Creative agency focusing on viral content and brand identity." },
+                { id: 3, name: "EcoFuture", industry: "Sustainability", logo: "https://ui-avatars.com/api/?name=EF&background=10B981&color=fff", verified: false, location: "Lviv", employees: "1-10", open: 2, rating: 4.5, desc: "Green business startup developing sustainable solutions." },
+                { id: 4, name: "GlobalBridge", industry: "Consulting", logo: "https://ui-avatars.com/api/?name=GB&background=3D7CFF&color=fff", verified: true, location: "Remote", employees: "100+", open: 12, rating: 4.7, desc: "International business consulting for emerging markets." },
+                { id: 5, name: "NextGen Agency", industry: "Social Media", logo: "https://ui-avatars.com/api/?name=NA&background=B75CFF&color=fff", verified: true, location: "Kyiv", employees: "10-50", open: 4, rating: 4.6, desc: "SMM and PR agency for Gen Z brands." },
+                { id: 6, name: "Finora", industry: "Finance", logo: "https://ui-avatars.com/api/?name=FI&background=F59E0B&color=fff", verified: false, location: "Remote", employees: "10-50", open: 3, rating: 4.4, desc: "Fintech startup democratizing personal finance." },
+                { id: 7, name: "YouthHub", industry: "Education", logo: "https://ui-avatars.com/api/?name=YH&background=EC4899&color=fff", verified: true, location: "Odesa", employees: "1-10", open: 6, rating: 4.9, desc: "NGO organizing educational events and conferences." },
+                { id: 8, name: "PixelLab", industry: "Design", logo: "https://ui-avatars.com/api/?name=PL&background=8B5CF6&color=fff", verified: true, location: "Remote", employees: "10-50", open: 5, rating: 4.8, desc: "UI/UX design studio for web3 products." }
+            ],
+            projects: [],
+            jobs: [],
+            chats: [
+                { id: 101, name: "Anna Miller", role: "MediaFlow", avatar: "https://ui-avatars.com/api/?name=Anna+M&background=random", status: "Online", project: "Social Media Campaign", messages: [{sender: "her", text: "Привіт! Ми переглянули твоє портфоліо. Готова обговорити проєкт?"}], unread: 2 },
+                { id: 102, name: "Alex Johnson", role: "StartUpX", avatar: "https://ui-avatars.com/api/?name=Alex+J&background=random", status: "Last seen 5 min ago", project: "Startup Research", messages: [{sender: "him", text: "Чудова робота над аналізом ринку!"}], unread: 0 },
+                { id: 103, name: "Maria Smith", role: "YouthHub", avatar: "https://ui-avatars.com/api/?name=Maria+S&background=random", status: "Online", project: "Event Coordination", messages: [{sender: "me", text: "Я надіслала оновлений список спикерів."}, {sender: "her", text: "Дякую, все супер :)"}], unread: 0 }
+            ]
+        };
+
+        // Generate 15 Projects
+        const pTitles = ["Social Media Manager", "Video Editor (Reels)", "Graphic Designer", "International Business Research", "Marketing Assistant", "Content Creator", "Translation EN-UA", "Startup Market Analysis", "Event Assistant", "SMM Manager Intern", "PR Assistant", "Business Analyst Junior", "IR Research Assistant", "UX/UI Design", "Copywriter"];
+        const pCats = ["Marketing", "Content", "Design", "Business", "Marketing", "Content", "International Relations", "Business", "Events", "Marketing", "Marketing", "Business", "International Relations", "IT", "Content"];
+        for(let i=0; i<15; i++) {
+            const comp = appData.companies[i % 8];
+            appData.projects.push({
+                id: 200 + i,
+                title: pTitles[i],
+                company: comp,
+                category: pCats[i],
+                format: i % 2 === 0 ? "Remote" : "Hybrid",
+                duration: `${(i%3)+1} тижні`,
+                reward: `₴${1500 + (i*400)}`,
+                skills: [pCats[i], "Communication", "English"],
+                desc: `Компанія ${comp.name} шукає талановитого студента для виконання реального завдання у сфері ${pCats[i].toLowerCase()}. Отримайте цінний досвід та відгук у профіль.`,
+                applied: false
+            });
+        }
+
+        // Generate Jobs
+        const jTitles = ["Part-time SMM Specialist", "Junior UX Designer", "Marketing Intern", "Business Development", "Content Writer", "Event Coordinator"];
+        for(let i=0; i<6; i++) {
+            appData.jobs.push({
+                id: 300 + i,
+                title: jTitles[i],
+                company: appData.companies[i % 8],
+                type: i%2===0 ? "Стажування" : "Part-time",
+                location: i%3===0 ? "Одеса" : "Remote",
+                salary: i%2===0 ? "Досвід / Оплата" : `₴${8000 + (i*1000)}/міс`
+            });
+        }
+
+        const app = {
+            state: { activeView: 'dashboard', activeChat: null, filterStr: 'All' },
+
+            init() {
+                if(localStorage.getItem('studentconnect_auth') === 'true') {
+                    this.startApp();
+                } else {
+                    document.getElementById('login-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.loginAsDemo();
+                    });
+                }
+            },
+
+            loginAsDemo() {
+                localStorage.setItem('studentconnect_auth', 'true');
+                this.startApp();
+            },
+
+            startApp() {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                this.loadUserState();
+                this.renderNavigation();
+                this.renderAllViews();
+                this.switchView('dashboard');
+            },
+
+            logout() {
+                localStorage.removeItem('studentconnect_auth');
+                window.location.reload();
+            },
+
+            loadUserState() {
+                const saved = localStorage.getItem('studentconnect_user');
+                if(saved) appData.user = JSON.parse(saved);
+                document.getElementById('topbar-name').innerText = appData.user.name;
+                document.getElementById('topbar-avatar').src = appData.user.avatar;
+                document.getElementById('topbar-level').innerText = appData.user.level;
+                document.getElementById('topbar-xp').innerText = `${appData.user.nextXp - appData.user.xp} XP до Lvl ${appData.user.level + 1}`;
+            },
+
+            saveUserState() {
+                localStorage.setItem('studentconnect_user', JSON.stringify(appData.user));
+                this.loadUserState();
+            },
+
+            switchView(viewId) {
+                this.state.activeView = viewId;
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                document.getElementById(`view-${viewId}`).classList.add('active');
+                
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    el.classList.remove('active', 'bg-brand-purple', 'bg-opacity-10', 'text-brand-purple');
+                    if(el.dataset.target === viewId) el.classList.add('active', 'bg-brand-purple', 'bg-opacity-10', 'text-brand-purple');
+                });
+                
+                document.querySelectorAll('.mobile-nav-item').forEach(el => {
+                    el.classList.remove('text-brand-purple');
+                    el.classList.add('text-gray-400');
+                    if(el.dataset.target === viewId) {
+                        el.classList.remove('text-gray-400');
+                        el.classList.add('text-brand-purple');
+                    }
+                });
+                window.scrollTo(0, 0);
+            },
+
+            renderNavigation() {
+                const navItems = [
+                    { id: 'dashboard', icon: 'ph-house', label: 'Головна' },
+                    { id: 'projects', icon: 'ph-briefcase', label: 'Проєкти' },
+                    { id: 'companies', icon: 'ph-buildings', label: 'Компанії' },
+                    { id: 'jobs', icon: 'ph-suitcase-simple', label: 'Вакансії' },
+                    { id: 'chats', icon: 'ph-chat-circle', label: 'Повідомлення', badge: 2 },
+                    { id: 'profile', icon: 'ph-user', label: 'Профіль' }
+                ];
+                document.getElementById('nav-menu').innerHTML = navItems.map(item => `
+                    <button onclick="app.switchView('${item.id}')" data-target="${item.id}" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm font-medium mb-1">
+                        <div class="flex items-center gap-3"><i class="ph ${item.icon} text-xl"></i>${item.label}</div>
+                        ${item.badge ? `<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">${item.badge}</span>` : ''}
+                    </button>
+                `).join('');
+            },
+
+            renderAllViews() {
+                this.renderDashboard();
+                this.renderProjects();
+                this.renderCompanies();
+                this.renderJobs();
+                this.renderChats();
+                this.renderProfile();
+            },
+
+            renderDashboard() {
+                const u = appData.user;
+                const progress = (u.xp / u.nextXp) * 100;
+                document.getElementById('view-dashboard').innerHTML = `
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="w-full md:w-2/3 space-y-6">
+                            <div class="bg-brand-navy rounded-3xl p-8 text-white relative overflow-hidden shadow-lg">
+                                <div class="absolute top-0 right-0 w-64 h-64 bg-brand-purple rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+                                <h1 class="text-3xl font-bold mb-2">Привіт, ${u.name.split(' ')[0]} 👋</h1>
+                                <p class="text-blue-200 mb-6">Твій перший досвід починається тут.</p>
+                                <div class="bg-white bg-opacity-10 p-4 rounded-2xl flex items-center gap-6 backdrop-blur-sm">
+                                    <div class="text-2xl font-bold">Lvl ${u.level}</div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between text-xs mb-1"><span>Прогрес до рівня ${u.level+1}</span><span>${Math.round(progress)}%</span></div>
+                                        <div class="w-full bg-white bg-opacity-20 rounded-full h-2"><div class="bg-brand-cyan h-2 rounded-full" style="width: ${progress}%"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold">Рекомендовані проєкти</h3>
+                                    <button class="text-brand-purple text-sm font-medium hover:underline" onclick="app.switchView('projects')">Усі</button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    ${appData.projects.slice(0, 4).map(p => this.createProjectCard(p)).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/3 space-y-6">
+                            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                                <div class="flex items-center gap-3 mb-3 text-brand-purple"><i class="ph-fill ph-magic-wand text-2xl"></i><h3 class="font-bold text-lg text-brand-navy">AI Career Assistant</h3></div>
+                                <p class="text-xs text-gray-600 mb-4">Твої сильні сторони: <span class="font-bold text-brand-navy">Content Creation, SMM</span>.</p>
+                                <button onclick="app.switchView('projects')" class="w-full py-2.5 border border-brand-purple text-brand-purple rounded-xl font-medium hover:bg-brand-purple hover:text-white transition text-xs">Знайти проєкти</button>
+                            </div>
+                            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 grid grid-cols-2 gap-4 text-center">
+                                <div class="p-3 bg-gray-50 rounded-2xl"><div class="text-2xl font-bold text-brand-navy">${u.stats.projects}</div><div class="text-[10px] text-gray-500">Заявок</div></div>
+                                <div class="p-3 bg-gray-50 rounded-2xl"><div class="text-2xl font-bold text-brand-purple">${u.stats.completed}</div><div class="text-[10px] text-gray-500">Виконано</div></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderProjects() {
+                const filters = ['All', 'Remote', 'Paid', 'Marketing', 'Content', 'Business'];
+                document.getElementById('project-filters').innerHTML = filters.map(f => 
+                    `<button onclick="app.setProjFilter('${f}')" class="px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition ${this.state.filterStr === f ? 'bg-brand-navy text-white' : 'bg-white text-gray-600 border border-gray-200'}">${f}</button>`
+                ).join('');
+
+                const filtered = this.state.filterStr === 'All' ? appData.projects : appData.projects.filter(p => p.category === this.state.filterStr || p.format === this.state.filterStr);
+                document.getElementById('projects-grid').innerHTML = filtered.map(p => this.createProjectCard(p)).join('');
+            },
+
+            setProjFilter(f) { this.state.filterStr = f; this.renderProjects(); },
+
+            createProjectCard(p) {
+                return `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer flex flex-col justify-between" onclick="app.openProjectModal(${p.id})">
+                        <div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="${p.company.logo}" class="w-10 h-10 rounded-xl object-cover">
+                                <div><p class="text-[10px] font-semibold text-gray-500">${p.company.name}</p><h4 class="font-bold text-sm text-brand-navy line-clamp-1">${p.title}</h4></div>
+                            </div>
+                            <span class="px-2 py-0.5 bg-blue-50 text-brand-blue text-[10px] font-bold rounded">${p.category}</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                            <span class="font-bold text-brand-purple text-sm">${p.reward}</span>
+                            <span class="text-xs font-semibold text-gray-600">Деталі →</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderCompanies() {
+                document.getElementById('companies-grid').innerHTML = appData.companies.map(c => `
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer" onclick="app.openCompanyModal(${c.id})">
+                        <div class="flex items-center gap-4 mb-3">
+                            <img src="${c.logo}" class="w-12 h-12 rounded-xl">
+                            <div><h4 class="font-bold text-base flex items-center gap-1">${c.name} ${c.verified ? '<i class="ph-fill ph-seal-check text-brand-blue text-sm"></i>' : ''}</h4><p class="text-xs text-gray-500">${c.industry}</p></div>
+                        </div>
+                        <p class="text-xs text-gray-600 line-clamp-2 mb-4">${c.desc}</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500"><span>${c.open} відкритих проєктів</span><span class="text-yellow-500 font-bold">★ ${c.rating}</span></div>
+                    </div>
+                `).join('');
+            },
+
+            renderJobs() {
+                document.getElementById('jobs-list').innerHTML = appData.jobs.map(j => `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <img src="${j.company.logo}" class="w-10 h-10 rounded-xl">
+                            <div><h4 class="font-bold text-base">${j.title}</h4><p class="text-xs text-gray-500">${j.company.name} • ${j.location}</p></div>
+                        </div>
+                        <span class="px-3 py-1 bg-green-50 text-green-600 text-xs font-bold rounded-full">${j.salary}</span>
+                    </div>
+                `).join('');
+            },
+
+            renderChats() {
+                document.getElementById('chat-list').innerHTML = appData.chats.map(c => `
+                    <div class="flex items-center gap-3 p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 ${this.state.activeChat === c.id ? 'bg-blue-50' : ''}" onclick="app.openChat(${c.id})">
+                        <img src="${c.avatar}" class="w-10 h-10 rounded-full">
+                        <div class="flex-1 min-w-0"><h4 class="font-bold text-sm truncate">${c.name}</h4><p class="text-xs text-gray-500 truncate">${c.messages[c.messages.length-1].text}</p></div>
+                    </div>
+                `).join('');
+                if(!this.state.activeChat && appData.chats.length > 0) this.openChat(appData.chats[0].id);
+            },
+
+            openChat(id) {
+                this.state.activeChat = id;
+                this.renderChats();
+                const chat = appData.chats.find(c => c.id === id);
+                document.getElementById('chat-window').innerHTML = `
+                    <div class="h-16 border-b border-gray-100 bg-white flex items-center px-6 gap-3"><img src="${chat.avatar}" class="w-8 h-8 rounded-full"><h4 class="font-bold text-sm">${chat.name}</h4></div>
+                    <div class="flex-1 p-6 overflow-y-auto space-y-3" id="msgs">${chat.messages.map(m => `<div class="flex ${m.sender==='me'?'justify-end':'justify-start'}"><div class="p-3 rounded-xl text-sm ${m.sender==='me'?'bg-brand-purple text-white':'bg-white shadow-sm'}">${m.text}</div></div>`).join('')}</div>
+                    <div class="p-4 bg-white border-t border-gray-100"><form onsubmit="app.sendMsg(event, ${chat.id})" class="flex gap-2"><input type="text" id="msg-input" placeholder="Повідомлення..." class="flex-1 bg-gray-50 rounded-xl px-4 py-2 text-sm focus:outline-none" required><button class="px-4 bg-brand-purple text-white rounded-xl text-sm font-medium">➤</button></form></div>
+                `;
+            },
+
+            sendMsg(e, id) {
+                e.preventDefault();
+                const inp = document.getElementById('msg-input');
+                appData.chats.find(c => c.id === id).messages.push({sender: 'me', text: inp.value});
+                this.openChat(id);
+            },
+
+            renderProfile() {
+                const u = appData.user;
+                document.getElementById('view-profile').innerHTML = `
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+                        <div class="h-36 gradient-bg"></div>
+                        <div class="px-8 pb-8 -mt-12">
+                            <div class="flex items-end gap-4 mb-6">
+                                <img src="${u.avatar}" class="w-24 h-24 rounded-full border-4 border-white object-cover bg-white">
+                                <div><h1 class="text-2xl font-bold">${u.name}</h1><p class="text-xs text-gray-500">${u.username} • ${u.title}</p></div>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-6">${u.bio}</p>
+                            <h3 class="font-bold text-base mb-3">Навички</h3>
+                            <div class="flex flex-wrap gap-2">${u.skills.map(s => `<span class="px-3 py-1 bg-blue-50 text-brand-blue rounded-lg text-xs font-medium">${s}</span>`).join('')}</div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            openModal(html) {
+                const bd = document.getElementById('modal-backdrop');
+                bd.innerHTML = html;
+                bd.classList.remove('hidden');
+            },
+
+            closeModal() { document.getElementById('modal-backdrop').classList.add('hidden'); },
+
+            openProjectModal(id) {
+                const p = appData.projects.find(x => x.id === id);
+                this.openModal(`
+                    <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl relative" onclick="event.stopPropagation()">
+                        <button onclick="app.closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
+                        <h2 class="text-xl font-bold mb-1">${p.title}</h2>
+                        <p class="text-xs text-gray-500 mb-4">${p.company.name} • ${p.reward}</p>
+                        <p class="text-sm text-gray-600 mb-6">${p.desc}</p>
+                        <button onclick="alert('Заявку успішно надіслано!'); app.closeModal();" class="w-full py-3 bg-brand-navy text-white rounded-xl text-sm font-medium">Подати заявку</button>
+                    </div>
+                `);
+            },
+
+            openCompanyModal(id) {
+                const c = appData.companies.find(x => x.id === id);
+                this.openModal(`
+                    <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl relative" onclick="event.stopPropagation()">
+                        <button onclick="app.closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
+                        <h2 class="text-xl font-bold mb-1">${c.name}</h2>
+                        <p class="text-xs text-brand-purple mb-4">${c.industry} • ${c.location}</p>
+                        <p class="text-sm text-gray-600 mb-6">${c.desc}</p>
+                        <button onclick="app.closeModal()" class="w-full py-3 bg-brand-navy text-white rounded-xl text-sm font-medium">Закрити</button>
+                    </div>
+                `);
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
